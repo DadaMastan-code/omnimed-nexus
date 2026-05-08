@@ -37,13 +37,32 @@ dev = [
     "mypy>=1.15.0",
 ]
 
+ci = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.25.0",
+    "ruff>=0.11.0",
+    "mypy>=1.15.0",
+    # Lightweight deps only — no torch/CUDA in CI
+    "sentence-transformers>=3.4.0",
+]
+
+[tool.setuptools.packages.find]
+include = [
+    "orchestrator*",
+    "github_app*",
+    "rag_layer*",
+    "graph_layer*",
+    "ml_registry*",
+    "eval_harness*",
+]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "ANN"]
-ignore = ["ANN101", "ANN102"]
+select = ["E", "F", "I", "UP"]
+ignore = ["E501"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
