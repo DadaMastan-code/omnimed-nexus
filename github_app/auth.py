@@ -6,10 +6,10 @@ import time
 from pathlib import Path
 
 import httpx
+import jwt
 import structlog
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
-import jwt
 
 from config import settings
 

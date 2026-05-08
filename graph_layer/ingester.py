@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import re
-from typing import Any
-
 import httpx
 import structlog
 from neo4j import GraphDatabase

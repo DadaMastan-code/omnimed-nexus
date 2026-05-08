@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
 import httpx
 import structlog
 from langchain_core.tools import tool
-from qdrant_client import QdrantClient
-from qdrant_client.models import Filter, FieldCondition, MatchAny
 from neo4j import GraphDatabase
+from qdrant_client import QdrantClient
+from qdrant_client.models import FieldCondition, Filter, MatchAny
 
 from config import settings
 

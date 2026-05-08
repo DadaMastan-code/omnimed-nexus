@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from typing import Annotated, Any, TypedDict
 
 import structlog
@@ -19,13 +18,6 @@ from orchestrator.prompts import META_AGENT_SYSTEM, SYNTHESIZER_PROMPT
 from orchestrator.router import route
 from orchestrator.tools import (
     ALL_TOOLS,
-    clinical_reason,
-    diagnose_leukemia,
-    review_code,
-    review_pr_diff,
-    search_knowledge,
-    get_repo_status,
-    create_github_issue,
 )
 
 log = structlog.get_logger()

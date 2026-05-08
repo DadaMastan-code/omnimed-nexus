@@ -25,7 +25,6 @@ def register_model(
     tags: dict[str, str] | None = None,
 ) -> str:
     """Register a model version and return its version number."""
-    client = get_client()
     model_uri = f"runs:/{run_id}/{artifact_path}"
     mv = mlflow.register_model(model_uri=model_uri, name=model_name, tags=tags)
     log.info("model_registered", name=model_name, version=mv.version, run_id=run_id)
