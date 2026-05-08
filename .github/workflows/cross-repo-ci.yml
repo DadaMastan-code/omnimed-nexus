@@ -45,11 +45,11 @@ jobs:
       - name: Install uv
         run: pip install uv
 
-      - name: Install CPU-only torch
-        run: uv pip install --system torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Install CPU-only torch via pip (isolated from project resolver)
+        run: pip install torch --index-url https://download.pytorch.org/whl/cpu
 
-      - name: Install project
-        run: uv pip install --system -e "." --extra-index-url https://download.pytorch.org/whl/cpu pytest pytest-asyncio
+      - name: Install project via uv (PyPI only — no index pollution from pytorch whl)
+        run: uv pip install --system -e "." pytest pytest-asyncio
 
       - name: Verify imports
         run: python -c "import orchestrator, github_app, rag_layer, graph_layer, ml_registry, eval_harness; print('All packages OK')"
@@ -88,8 +88,8 @@ jobs:
 
       - name: Install CPU torch + project
         run: |
-          uv pip install --system torch --index-url https://download.pytorch.org/whl/cpu
-          uv pip install --system -e . --extra-index-url https://download.pytorch.org/whl/cpu
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          uv pip install --system -e .
 
       - name: Re-index changed repo
         run: |
