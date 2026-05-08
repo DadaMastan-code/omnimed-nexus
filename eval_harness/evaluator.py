@@ -17,11 +17,17 @@ class NexusEvaluator:
     """Orchestrates evaluation across all three repos and logs to MLflow."""
 
     def __init__(self) -> None:
-        mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
-        mlflow.set_experiment(settings.mlflow_experiment_name)
+        self._initialized = False
+
+    def _ensure_mlflow(self) -> None:
+        if not self._initialized:
+            mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
+            mlflow.set_experiment(settings.mlflow_experiment_name)
+            self._initialized = True
 
     async def evaluate_code_quality(self, repo: str, codesense_review: dict[str, Any]) -> CodeQualityMetrics:
         """Parse a codesense-ai review into structured metrics."""
+        self._ensure_mlflow()
         scores = codesense_review.get("scores", {})
         issues = codesense_review.get("issues", [])
 
@@ -51,6 +57,7 @@ class NexusEvaluator:
         tags: dict[str, str] | None = None,
     ) -> ClinicalMLMetrics:
         """Evaluate a clinical ML model and log metrics to MLflow."""
+        self._ensure_mlflow()
         metrics = ClinicalMLMetrics(y_true=y_true, y_pred=y_pred, y_prob=y_prob)
         result = metrics.to_dict()
 
