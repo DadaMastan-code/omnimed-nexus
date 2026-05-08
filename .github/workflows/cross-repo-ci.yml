@@ -52,6 +52,8 @@ jobs:
         run: uv pip install --system -e "." pytest pytest-asyncio
 
       - name: Verify imports
+        env:
+          ANTHROPIC_API_KEY: sk-ant-placeholder
         run: python -c "import orchestrator, github_app, rag_layer, graph_layer, ml_registry, eval_harness; print('All packages OK')"
 
       - name: Run tests
