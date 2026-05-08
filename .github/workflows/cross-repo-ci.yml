@@ -30,21 +30,11 @@ jobs:
       qdrant:
         image: qdrant/qdrant:latest
         ports: ["6333:6333"]
-        options: >-
-          --health-cmd "wget -qO- http://localhost:6333/healthz || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
       neo4j:
         image: neo4j:5.27
         env:
           NEO4J_AUTH: neo4j/testpassword
         ports: ["7474:7474", "7687:7687"]
-        options: >-
-          --health-cmd "wget -qO- http://localhost:7474 || exit 1"
-          --health-interval 15s
-          --health-timeout 10s
-          --health-retries 10
     steps:
       - uses: actions/checkout@v4
 
@@ -55,19 +45,14 @@ jobs:
       - name: Install uv
         run: pip install uv
 
-      - name: Install CPU-only torch (avoids 1.5GB CUDA download in CI)
-        run: |
-          uv pip install --system torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Install CPU-only torch
+        run: uv pip install --system torch --index-url https://download.pytorch.org/whl/cpu
 
-      - name: Install project deps
-        run: |
-          uv pip install --system -e "." \
-            --extra-index-url https://download.pytorch.org/whl/cpu \
-            pytest pytest-asyncio
+      - name: Install project
+        run: uv pip install --system -e "." --extra-index-url https://download.pytorch.org/whl/cpu pytest pytest-asyncio
 
-      - name: Verify package imports
-        run: |
-          python -c "import orchestrator; import github_app; import rag_layer; import graph_layer; import ml_registry; import eval_harness; print('All packages import OK')"
+      - name: Verify imports
+        run: python -c "import orchestrator, github_app, rag_layer, graph_layer, ml_registry, eval_harness; print('All packages OK')"
 
       - name: Run tests
         env:
@@ -80,16 +65,17 @@ jobs:
           MEDFUSION_API_URL: http://localhost:8002
           MEDBRAIN_API_URL: http://localhost:8003
           MLFLOW_TRACKING_URI: http://localhost:5001
-        run: |
-          if [ -d tests ]; then
-            pytest tests/ -v --tb=short
-          else
-            echo "No tests directory yet — skipping. Add tests/ to enable."
-          fi
+        run: pytest tests/ -v --tb=short
 
   reindex-knowledge-base:
     runs-on: ubuntu-latest
     if: github.event_name == 'repository_dispatch' && github.event.action == 'reindex'
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GITHUB_TOKEN: ${{ secrets.OMNIMED_GITHUB_TOKEN }}
+      QDRANT_HOST: ${{ secrets.QDRANT_HOST }}
+      QDRANT_API_KEY: ${{ secrets.QDRANT_API_KEY }}
+      SOURCE_REPO: ${{ github.event.client_payload.source_repo }}
     steps:
       - uses: actions/checkout@v4
 
@@ -106,11 +92,6 @@ jobs:
           uv pip install --system -e . --extra-index-url https://download.pytorch.org/whl/cpu
 
       - name: Re-index changed repo
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.OMNIMED_GITHUB_TOKEN }}
-          QDRANT_HOST: ${{ secrets.QDRANT_HOST }}
-          QDRANT_API_KEY: ${{ secrets.QDRANT_API_KEY }}
         run: |
           python - <<'EOF'
           import asyncio, os
@@ -124,5 +105,3 @@ jobs:
               asyncio.run(index_all_repos())
               print("Full re-index complete")
           EOF
-        env:
-          SOURCE_REPO: ${{ github.event.client_payload.source_repo }}
