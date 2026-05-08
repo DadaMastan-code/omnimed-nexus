@@ -1,0 +1,50 @@
+[project]
+name = "omnimed-nexus"
+version = "0.1.0"
+description = "God-mode ML orchestration hub — connects codesense-ai, MedFusion-Leuk, medbrain-ai into one self-improving system"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.34.0",
+    "langgraph>=0.3.0",
+    "langchain-anthropic>=0.3.0",
+    "langchain-community>=0.3.0",
+    "anthropic>=0.49.0",
+    "qdrant-client>=1.14.0",
+    "neo4j>=5.27.0",
+    "mlflow>=2.21.0",
+    "PyGithub>=2.6.0",
+    "httpx>=0.28.0",
+    "pydantic>=2.11.0",
+    "pydantic-settings>=2.9.0",
+    "python-multipart>=0.0.20",
+    "cryptography>=44.0.0",
+    "structlog>=25.0.0",
+    "rich>=14.0.0",
+    "tenacity>=9.0.0",
+    "numpy>=2.2.0",
+    "pandas>=2.2.0",
+    "scikit-learn>=1.6.0",
+    "sentence-transformers>=3.4.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.25.0",
+    "ruff>=0.11.0",
+    "mypy>=1.15.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "ANN"]
+ignore = ["ANN101", "ANN102"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

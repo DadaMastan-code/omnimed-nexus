@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+dist/
+.env
+*.pem
+
+# Node
+node_modules/
+.next/
+dashboard/.next/
+dashboard/node_modules/
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Data / models
+*.pt
+*.pth
+*.pkl
+*.joblib
+*.onnx
+*.h5
+
+# IDE
+.vscode/
+.idea/
+
+# Docker
+.dockerignore
+
+# OS
+.DS_Store

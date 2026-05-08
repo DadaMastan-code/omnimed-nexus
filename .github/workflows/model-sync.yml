@@ -1,0 +1,51 @@
+name: Model Sync — MedFusion-Leuk → medbrain-ai
+
+on:
+  repository_dispatch:
+    types: [model-updated]     # fired by MedFusion-Leuk CI when a new checkpoint is pushed
+  workflow_dispatch:
+
+jobs:
+  sync-models:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install uv && uv pip install --system -e .
+
+      - name: Sync production model to medbrain-ai
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.OMNIMED_GITHUB_TOKEN }}
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+          MEDBRAIN_API_URL: ${{ secrets.MEDBRAIN_API_URL }}
+          MEDFUSION_API_URL: ${{ secrets.MEDFUSION_API_URL }}
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+        run: |
+          python - <<'EOF'
+          import asyncio
+          from ml_registry.sync import sync_medfusion_to_medbrain
+
+          result = asyncio.run(sync_medfusion_to_medbrain())
+          print(f"Sync result: {result}")
+          if result.get("status") != "synced":
+              raise SystemExit(f"Sync failed: {result}")
+          EOF
+
+      - name: Post summary to Slack / GitHub
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.OMNIMED_GITHUB_TOKEN }}
+        run: |
+          gh api repos/DadaMastan-code/omnimed-nexus/issues \
+            --method POST \
+            --field title="[Model Sync] MedFusion-Leuk → medbrain-ai — $(date -u +%Y-%m-%d)" \
+            --field body="Automated model sync triggered by \`model-updated\` dispatch. See workflow run for details." \
+            --field "labels[]=model-sync,automated" || true
